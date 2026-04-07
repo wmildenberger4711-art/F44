@@ -40,14 +40,12 @@ function drawParty() {
     // Calculate this row's vertical position.
     const y = panelY + i * 85;
 
-    // Check if this character is currently highlighted.
-    const isSelected = i === activeCharacterIndex;
 
     // Check if this character is the one whose turn it is.
     const isTurn = i === currentTurnIndex && gameState !== GAME_STATES.GAME_OVER;
 
     // Background color changes if selected.
-    ctx.fillStyle = isSelected ? "#2d2d00" : "#181818";
+    ctx.fillStyle = isTurn ? "#2d2d00" : "#181818";
     ctx.fillRect(panelX, y, 260, 70);
 
     // Border changes if it's this character's turn.
@@ -210,7 +208,7 @@ function drawHUD() {
   ctx.fillStyle = "#bbbbbb";
 
   if (gameState === GAME_STATES.PLAYER_CHOOSE) {
-    ctx.fillText("1-4 select character | A attack", 420, 30);
+    ctx.fillText("A = attack", 420, 30);
   } else if (gameState === GAME_STATES.PLAYER_ATTACK_TIMING) {
     ctx.fillText("SPACE = stop the attack marker", 420, 30);
   } else if (gameState === GAME_STATES.ENEMY_TELEGRAPH) {

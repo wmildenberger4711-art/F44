@@ -58,8 +58,6 @@ let playerParty = [];
 // The boss object.
 let boss = null;
 
-// Which character is highlighted in the UI.
-let activeCharacterIndex = 0;
 
 // Which character's turn it currently is.
 let currentTurnIndex = 0;
@@ -78,7 +76,7 @@ let attackBar = {
   h: 24,           // total height
   markerX: 100,    // current x of moving marker
   markerW: 14,     // width of moving marker
-  speed: 6,        // movement speed
+  speed: 5,        // movement speed
   dir: 1,          // direction: 1 = right, -1 = left
   targetX: 250,    // x position of green hit zone
   targetW: 90      // width of green hit zone
@@ -219,8 +217,6 @@ function nextLivingCharacterTurn() {
     tries++;
   } while (playerParty[currentTurnIndex].hp <= 0 && tries < 10);
 
-  // Also update the highlighted selection to match the current turn.
-  activeCharacterIndex = currentTurnIndex;
 }
 
 // Calculate the final score at the end of the fight.
