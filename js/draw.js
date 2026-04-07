@@ -124,6 +124,7 @@ function drawAttackTimingUI() {
   // Instruction text.
   ctx.fillStyle = "white";
   ctx.font = "18px Arial";
+  ctx.fillText(`Current Action: ${currentAction}`, 120, 300);
   ctx.fillText("Press SPACE when the marker is centered in the target!", 120, 330);
 
   // Draw the dark attack bar background.
@@ -208,7 +209,7 @@ function drawHUD() {
   ctx.fillStyle = "#bbbbbb";
 
   if (gameState === GAME_STATES.PLAYER_CHOOSE) {
-    ctx.fillText("A = attack", 420, 30);
+    ctx.fillText("A = attack | S = skill", 420, 30);
   } else if (gameState === GAME_STATES.PLAYER_ATTACK_TIMING) {
     ctx.fillText("SPACE = stop the attack marker", 420, 30);
   } else if (gameState === GAME_STATES.ENEMY_TELEGRAPH) {

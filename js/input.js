@@ -35,7 +35,16 @@ document.addEventListener("keydown", function (event) {
       }
 
       // Start the timing attack.
-      startAttackTiming();
+      startAttackTiming("attack");
+    }
+    if(event.code === "KeyS"){
+        const actor = getCurrentCharacter();
+
+        if(!actor || actor.hp <= 0){
+            return;
+        }
+
+        startAttackTiming("skill");
     }
   }
 

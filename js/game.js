@@ -65,6 +65,9 @@ let currentTurnIndex = 0;
 // Which state the game is currently in.
 let gameState = GAME_STATES.PLAYER_CHOOSE;
 
+//action
+let currentAction = "attack";
+
 // -----------------------------------------------------
 // ATTACK TIMING BAR
 // -----------------------------------------------------
@@ -147,6 +150,8 @@ function resetGame() {
 
   // Begin in the player choose state.
   gameState = GAME_STATES.PLAYER_CHOOSE;
+
+  currentAction = "attack";
 
   // Reset attack bar values.
   attackBar.markerX = attackBar.x;
@@ -247,7 +252,8 @@ function calculateFinalScore() {
 // =====================================================
 
 // Start the player's timing attack.
-function startAttackTiming() {
+function startAttackTiming(actionType = "attack") {
+  currentAction = actionType;
   // Change the game state so the timing bar becomes active.
   gameState = GAME_STATES.PLAYER_ATTACK_TIMING;
 
@@ -299,6 +305,7 @@ function resolveAttackTiming() {
   // We'll store the final damage here.
   let damage = 0;
 
+
   // If very close to center, it's a perfect hit.
   if (distance <= 10) {
     damage = Math.floor(actor.attack * 2.2);
@@ -320,6 +327,18 @@ function resolveAttackTiming() {
   else {
     damage = 0;
     setFloatingText("Miss", 60);
+  }
+
+  if(currentAction === "skill"){
+    if(actor.name ==="Gustave"){
+      damage = Math.floor(damage * 1.6);
+    }else if(actor.name === "Lune"){
+      damage = Math.floor(damage * 1,8);
+    }else if(actor.name === "Maelle"){
+      damage = Math.floor(damage * 1.5);
+    }else if(actor.name === "Sciel"){
+      damage = Math.floor(damage * 1.4);
+    }
   }
 
   // Apply damage to the boss.
