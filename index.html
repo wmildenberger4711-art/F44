@@ -1,13 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Timing Game Prototype</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- The page title shown in the browser tab -->
+  <title>Daily Boss Combat Prototype</title>
+
+  <!-- Link to our CSS file for page styling -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- 
+    This canvas is where the whole game will be drawn.
+    JavaScript will grab this element and draw shapes/text onto it.
+  -->
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-<canvas id="gameCanvas" width="600" height="200"></canvas>
+  <!-- 
+    IMPORTANT:
+    Script order matters when using plain JS files like this.
+    Files loaded earlier create variables/functions that later files can use.
+  -->
 
-<script src="script.js"></script>
+  <!-- game.js creates the game state, data, and combat logic -->
+  <script src="js/game.js"></script>
 
+  <!-- draw.js contains all the drawing/rendering functions -->
+  <script src="js/draw.js"></script>
+
+  <!-- input.js handles keyboard input -->
+  <script src="js/input.js"></script>
+
+  <!-- main.js starts the game loop after everything else exists -->
+  <script src="js/main.js"></script>
 </body>
 </html>

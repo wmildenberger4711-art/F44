@@ -1,0 +1,31 @@
+/* 
+  Remove default browser spacing so the canvas can sit cleanly on the page.
+*/
+body {
+  margin: 0;
+
+  /* Dark background around the canvas */
+  background: #111;
+
+  /* Center the canvas horizontally */
+  display: flex;
+  justify-content: center;
+
+  /* Center the canvas vertically */
+  align-items: center;
+
+  /* Make the body fill the whole screen height */
+  min-height: 100vh;
+}
+
+/* Style the canvas itself */
+canvas {
+  /* Dark background inside the game area */
+  background: black;
+
+  /* Simple visible border around the game */
+  border: 2px solid white;
+
+  /* Prevent weird blurry scaling in some cases */
+  image-rendering: pixelated;
+}
