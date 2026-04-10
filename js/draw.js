@@ -105,6 +105,11 @@ function drawBoss() {
   ctx.font = "16px Arial";
   ctx.fillText(`HP ${boss.hp}/${boss.maxHp}`, 340, 185);
 
+  if(boss.cursed){
+    ctx.fillStyle = "#bb66ff";
+    ctx.fillText(`Cursed (${boss.curseTurns})`, 340, 205);
+  }
+
   // If the enemy is telegraphing an attack, show move info.
   if (gameState === GAME_STATES.ENEMY_TELEGRAPH) {
     // Get the targeted character.

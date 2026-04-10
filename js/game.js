@@ -18,7 +18,7 @@ const GAME_STATES = {
 // We clone them later so the originals stay unchanged.
 const baseCharacters = [
   { name: "Gustave", maxHp: 110, hp: 110, attack: 18, speed: 10, skill: "Power Strike" },
-  { name: "Lune",    maxHp: 80,  hp: 80,  attack: 26, speed: 14, skill: "Arcane Burst" },
+  { name: "Lune",    maxHp: 80,  hp: 80,  attack: 26, speed: 14, skill: "Curse" },
   { name: "Maelle",  maxHp: 95,  hp: 95,  attack: 22, speed: 16, skill: "Swift Cut" },
   { name: "Sciel",   maxHp: 100, hp: 100, attack: 20, speed: 12, skill: "Marking Shot" },
   { name: "Renoir",  maxHp: 130, hp: 130, attack: 14, speed: 8,  skill: "Guard Break" },
@@ -139,11 +139,13 @@ function resetGame() {
     name: "The Painted Colossus",
     maxHp: 350,
     hp: 350,
-    phase: 1
+    phase: 1,
+    marked: false,
+    cursed: false,
+    curseTurns: 0,
+    curseDamage: 0,
+    curseCasterIndex: -1
   };
-
-  // Start with the first character selected.
-  activeCharacterIndex = 0;
 
   // Start with the first character's turn.
   currentTurnIndex = 0;
@@ -305,6 +307,8 @@ function resolveAttackTiming() {
   // We'll store the final damage here.
   let damage = 0;
 
+  let consumeMarkThisHit = false;
+
 
   // If very close to center, it's a perfect hit.
   if (distance <= 10) {
@@ -329,16 +333,43 @@ function resolveAttackTiming() {
     setFloatingText("Miss", 60);
   }
 
+  if(boss.marked && !(currentAction === "skill" && actor.name === "Sciel")){
+    consumeMarkThisHit = true;
+  }
+
   if(currentAction === "skill"){
     if(actor.name ==="Gustave"){
       damage = Math.floor(damage * 1.6);
+
     }else if(actor.name === "Lune"){
-      damage = Math.floor(damage * 1,8);
+      boss.cursed = true;
+      boss.curseTurns = 3;
+      boss.curseDamage = 12;
+      boss.curseCasterIndex = currentTurnIndex;
+
+      setFloatingText("Boss Cursed!", 60);
+
+      damage = Math.floor(damage * 0.7);
+      
     }else if(actor.name === "Maelle"){
       damage = Math.floor(damage * 1.5);
+      
     }else if(actor.name === "Sciel"){
-      damage = Math.floor(damage * 1.4);
+      boss.marked = true;
+      setFloatingText("Boss Marked", 60);
+      damage = Math.floor(damage * 0.6);//weaker hit, its a sep up move
     }
+  }
+
+  
+  if (consumeMarkThisHit){
+    damage = Math.floor(damage * 1.6);
+    boss.marked = false;
+    setFloatingText("Mark Bonus!", 60);
+  }
+
+  if (boss.cursed){
+    damage = Math.floor(damage * 1.2);
   }
 
   // Apply damage to the boss.
@@ -367,11 +398,50 @@ function resolveAttackTiming() {
 // =====================================================
 // ENEMY ATTACK FLOW
 // =====================================================
+function processBossStatuses(){
+  if (boss.cursed && boss.curseTurns > 0){
+    const curseDamage = boss.curseDamage;
+
+    //deal curse damage to boss
+    boss.hp -= curseDamage;
+    if (boss.hp < 0) boss.hp = 0;
+
+    //heal caster 1/2 curse damage
+    const caster = playerParty[boss.curseCasterIndex];
+    if(caster && caster.hp > 0) {
+      const healAmount = Math.floor(curseDamage / 2);
+      caster.hp += healAmount;
+
+      if(caster.hp > caster.maxHp){
+        caster.hp = caster.maxHp;
+      }
+    }
+    //reduce curse damaga duration by 1 turn
+    boss.curseTurns--;
+
+    if(boss.curseTurns <=0){
+      boss.cursed = false;
+      boss.curseCasterIndex = -1;
+      boss.curseDamage = 0;
+      setFloatingText("Curse Faded", 60);
+    }else{
+      setFloatingText("Curse Ticks!");
+    }
+  }
+}
 
 // Start the enemy telegraph state after the player attacks.
 function startEnemyTelegraph() {
   // Switch into enemy telegraph mode.
   gameState = GAME_STATES.ENEMY_TELEGRAPH;
+
+  processBossStatuses();
+
+  if(boss.hp<=0){
+    gameState = GAME_STATES.GAME_OVER;
+    setFloatingText("Boss Defeated!!", 9999);
+    return;
+  }
 
   // Build a list of indexes for alive party members.
   const aliveIndexes = playerParty
