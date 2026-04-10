@@ -8,7 +8,8 @@ const GAME_STATES = {
   PLAYER_CHOOSE: "player_choose",            // Player is choosing/readying their action
   PLAYER_ATTACK_TIMING: "player_attack_timing", // Player is doing timing attack
   ENEMY_TELEGRAPH: "enemy_telegraph",        // Enemy attack is winding up
-  GAME_OVER: "game_over"                     // Fight has ended
+  GAME_OVER: "game_over",   
+  TARGET_SELECT: "target_select"                  // Fight has ended
 };
 
 // -----------------------------------------------------
@@ -17,12 +18,12 @@ const GAME_STATES = {
 // These are "base" character definitions.
 // We clone them later so the originals stay unchanged.
 const baseCharacters = [
-  { name: "Gustave", maxHp: 110, hp: 110, attack: 18, speed: 10, skill: "Power Strike" },
-  { name: "Lune",    maxHp: 80,  hp: 80,  attack: 26, speed: 14, skill: "Curse" },
-  { name: "Maelle",  maxHp: 95,  hp: 95,  attack: 22, speed: 16, skill: "Swift Cut" },
-  { name: "Sciel",   maxHp: 100, hp: 100, attack: 20, speed: 12, skill: "Marking Shot" },
-  { name: "Renoir",  maxHp: 130, hp: 130, attack: 14, speed: 8,  skill: "Guard Break" },
-  { name: "Verso",   maxHp: 90,  hp: 90,  attack: 24, speed: 15, skill: "Chain Slash" }
+  { name: "Gustave", maxHp: 110, hp: 110, attack: 18, speed: 10, skill: "Power Strike", guardBuff:false},
+  { name: "Lune",    maxHp: 80,  hp: 80,  attack: 26, speed: 14, skill: "Curse", guardBuff:false },
+  { name: "Maelle",  maxHp: 95,  hp: 95,  attack: 22, speed: 16, skill: "Swift Cut", guardBuff:false },
+  { name: "Sciel",   maxHp: 100, hp: 100, attack: 20, speed: 12, skill: "Marking Shot", guardBuff:false },
+  { name: "Renoir",  maxHp: 130, hp: 130, attack: 14, speed: 8,  skill: "Guard Break", guardBuff:false },
+  { name: "Verso",   maxHp: 90,  hp: 90,  attack: 24, speed: 15, skill: "Chain Slash", guardBuff:false }
 ];
 
 // -----------------------------------------------------
@@ -67,6 +68,8 @@ let gameState = GAME_STATES.PLAYER_CHOOSE;
 
 //action
 let currentAction = "attack";
+
+let pendingSkillUserIndex = -1;
 
 // -----------------------------------------------------
 // ATTACK TIMING BAR
@@ -128,7 +131,7 @@ let floatingTextTimer = 0;
 function resetGame() {
   // Build the player's 4-person party from character templates.
   playerParty = [
-    cloneCharacter(baseCharacters[0]),
+    cloneCharacter(baseCharacters[4]),
     cloneCharacter(baseCharacters[1]),
     cloneCharacter(baseCharacters[2]),
     cloneCharacter(baseCharacters[3])
@@ -154,6 +157,8 @@ function resetGame() {
   gameState = GAME_STATES.PLAYER_CHOOSE;
 
   currentAction = "attack";
+
+  pendingSkillUserIndex = -1;
 
   // Reset attack bar values.
   attackBar.markerX = attackBar.x;
@@ -205,6 +210,22 @@ function getAliveParty() {
 // Return the character whose turn it is.
 function getCurrentCharacter() {
   return playerParty[currentTurnIndex];
+}
+
+function applyGuardBuffToTarget(targetIndex){
+  const target = playerParty[targetIndex];
+
+  if(!target || target.hp <=0){
+    setFloatingText("Invalid target", 60);
+    return;
+  }
+
+  target.guardBuff = true;
+  setFloatingText(`${target.name} is Guarded!`, 60);
+
+  pendingSkillUserIndex = -1;
+
+  startEnemyTelegraph();
 }
 
 // Check if all party members are dead.
@@ -359,6 +380,15 @@ function resolveAttackTiming() {
       setFloatingText("Boss Marked", 60);
       damage = Math.floor(damage * 0.6);//weaker hit, its a sep up move
     }
+
+    else if(actor.name === "Renoir"){
+      damage = 0;
+      pendingSkillUserIndex = currentTurnIndex;
+      gameState = GAME_STATES.TARGET_SELECT;
+      setFloatingText("Choose ally: 1-4", 120);
+      return;
+    }
+
   }
 
   
@@ -551,7 +581,27 @@ function resolveEnemyAttack() {
   }
 
   // Read the damage value for this enemy move.
-  const damage = enemyAttack.damage;
+  let damage = enemyAttack.damage;
+
+  if(target.guardBuff){
+    damage = Math.floor(damage * 0.6);
+    target.guardBuff = false;
+
+    const counterDamage = Math.floor(target.attack * 1.1);
+
+    boss.hp -= counterDamage;
+    if (boss.hp <0) boss.hp = 0;
+
+    score.damageDealt += counterDamage;
+
+    setFloatingText(`${target.name} Countered!`, 60);
+  }
+
+  if(boss.hp <=0){
+    gameState = GAME_STATES.GAME_OVER;
+    setFloatingText("Counter Kill!", 9999);
+    return;
+  }
 
   // Apply damage to the target.
   target.hp -= damage;

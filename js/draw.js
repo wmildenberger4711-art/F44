@@ -58,6 +58,14 @@ function drawParty() {
     // Draw character name.
     ctx.fillText(`${i + 1}. ${character.name}`, panelX + 10, y + 20);
 
+    if(character.guardBuff){
+      ctx.fillStyle = "#66ccff";
+      ctx.fillText("Guard", panelX + 170, y + 20);
+
+      //reset color back to normal characte text
+      ctx.fillStyle = character.hp > 0 ? "white" : "#777";
+    }
+
     // Draw stats line.
     ctx.fillText(`ATK ${character.attack}  SPD ${character.speed}`, panelX + 10, y + 40);
 
@@ -221,6 +229,9 @@ function drawHUD() {
     ctx.fillText("Z = parry", 420, 30);
   } else if (gameState === GAME_STATES.GAME_OVER) {
     ctx.fillText("Press R to restart", 420, 30);
+  }
+  else if(gameState === GAME_STATES.TARGET_SELECT){
+    ctx.fillText("Choose target: 1-4", 420, 30);
   }
 }
 

@@ -7,6 +7,13 @@ document.addEventListener("keydown", function (event) {
   // ---------------------------------------------------
   // GAME OVER INPUT
   // ---------------------------------------------------
+  if (gameState === GAME_STATES.TARGET_SELECT){
+    if(event.code === "Digit1") applyGuardBuffToTarget(0);
+    if(event.code === "Digit2") applyGuardBuffToTarget(1);
+    if(event.code === "Digit3") applyGuardBuffToTarget(2);
+    if(event.code === "Digit4") applyGuardBuffToTarget(3);
+    return;
+  }
   // If the game is over, only allow restart.
   if (gameState === GAME_STATES.GAME_OVER) {
     // Press R to reset the game.
