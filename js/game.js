@@ -71,6 +71,12 @@ let currentAction = "attack";
 
 let pendingSkillUserIndex = -1;
 
+let multiHitActive = false;
+let multiHitCurrent = 0;
+let multiHitTotal = 0;
+let multiHitUserIndex = -1;
+
+
 // -----------------------------------------------------
 // ATTACK TIMING BAR
 // -----------------------------------------------------
@@ -131,7 +137,7 @@ let floatingTextTimer = 0;
 function resetGame() {
   // Build the player's 4-person party from character templates.
   playerParty = [
-    cloneCharacter(baseCharacters[4]),
+    cloneCharacter(baseCharacters[5]),
     cloneCharacter(baseCharacters[1]),
     cloneCharacter(baseCharacters[2]),
     cloneCharacter(baseCharacters[3])
@@ -159,6 +165,11 @@ function resetGame() {
   currentAction = "attack";
 
   pendingSkillUserIndex = -1;
+
+  multiHitActive = false;
+  multiHitCurrent = 0;
+  multiHitTotal = 0;
+  multiHitUserIndex = -1;
 
   // Reset attack bar values.
   attackBar.markerX = attackBar.x;
@@ -380,15 +391,24 @@ function resolveAttackTiming() {
       boss.marked = true;
       setFloatingText("Boss Marked", 60);
       damage = Math.floor(damage * 0.6);//weaker hit, its a sep up move
-    }
 
-    else if(actor.name === "Renoir"){
+    }else if(actor.name === "Renoir"){
       damage = 0;
       pendingSkillUserIndex = currentTurnIndex;
       gameState = GAME_STATES.TARGET_SELECT;
       setFloatingText("Choose ally: 1-4", 120);
       return;
-    }
+
+    }else if(actor.name === "Verso"){
+      damage = Math.floor(damage * 0.9);
+
+      if(!multiHitActive){
+        multiHitActive = true;
+        multiHitCurrent = 1;
+        multiHitTotal = 2;
+        multiHitUserIndex = currentTurnIndex;
+      }
+    }    
 
   }
 
@@ -417,6 +437,11 @@ function resolveAttackTiming() {
 
   // If boss died, end the game now.
   if (boss.hp <= 0) {
+    multiHitActive = false;
+    multiHitCurrent = 0;
+    multiHitTotal = 0;
+    multiHitUserIndex = -1;
+    
     gameState = GAME_STATES.GAME_OVER;
     setFloatingText("BOSS DEFEATED!", 9999);
     return;
@@ -426,6 +451,25 @@ function resolveAttackTiming() {
     gameState = GAME_STATES.PLAYER_CHOOSE;
     setFloatingText("Extra Trun",70);
     return;
+  }
+
+  if(multiHitActive && actor.name === "Verso" && currentAction === "skill" && multiHitUserIndex === currentTurnIndex && multiHitCurrent <multiHitTotal){
+    multiHitCurrent++;
+    setFloatingText(`Chain Slash ${multiHitCurrent}!`,  60);
+    startAttackTiming("skill");
+    return;
+  }
+
+  if (
+    multiHitActive &&
+    actor.name === "Verso" &&
+    currentAction === "skill" &&
+    multiHitCurrent >= multiHitTotal
+  ) {
+    multiHitActive = false;
+    multiHitCurrent = 0;
+    multiHitTotal = 0;
+    multiHitUserIndex = -1;
   }
 
   // Otherwise hand control to the boss attack sequence.

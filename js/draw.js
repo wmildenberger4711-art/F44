@@ -138,6 +138,9 @@ function drawAttackTimingUI() {
   ctx.fillStyle = "white";
   ctx.font = "18px Arial";
   ctx.fillText(`Current Action: ${currentAction}`, 120, 300);
+  if(multiHitActive){
+    ctx.fillText(`Hit ${multiHitCurrent}/ ${multiHitTotal}`, 320, 300);
+  }
   ctx.fillText("Press SPACE when the marker is centered in the target!", 120, 330);
 
   // Draw the dark attack bar background.
