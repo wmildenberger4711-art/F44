@@ -327,8 +327,8 @@ function resolveAttackTiming() {
 
   // We'll store the final damage here.
   let damage = 0;
-
   let consumeMarkThisHit = false;
+  let wasPerfect = false;
 
 
   // If very close to center, it's a perfect hit.
@@ -336,6 +336,7 @@ function resolveAttackTiming() {
     damage = Math.floor(actor.attack * 2.2);
     setFloatingText("PERFECT HIT!", 70);
     score.perfectHits++;
+    wasPerfect = true;
   }
   // If somewhat close, it's a good hit.
   else if (distance <= 28) {
@@ -373,7 +374,7 @@ function resolveAttackTiming() {
       damage = Math.floor(damage * 0.7);
       
     }else if(actor.name === "Maelle"){
-      damage = Math.floor(damage * 1.5);
+      damage = Math.floor(damage * 1.3);
       
     }else if(actor.name === "Sciel"){
       boss.marked = true;
@@ -418,6 +419,12 @@ function resolveAttackTiming() {
   if (boss.hp <= 0) {
     gameState = GAME_STATES.GAME_OVER;
     setFloatingText("BOSS DEFEATED!", 9999);
+    return;
+  }
+
+  if(currentAction ==="skill" && actor.name === "Maelle" && wasPerfect){
+    gameState = GAME_STATES.PLAYER_CHOOSE;
+    setFloatingText("Extra Trun",70);
     return;
   }
 
